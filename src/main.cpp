@@ -17,15 +17,13 @@
 
 /*********** COMMUNICATION SELECTION ***********/
 //ADXL345 adxl = ADXL345();             // USE FOR I2C COMMUNICATION
-I2C_MPU6886 imu(I2C_MPU6886_DEFAULT_ADDRESS, Wire);
+MPU6886 imu(MPU6886_ADDRESS, Wire);
 
 
 //Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
   OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
-
-void display_drawtest(void);
 
 /******************** SETUP ********************/
 /*          Configure ADXL345 Settings         */
@@ -37,11 +35,11 @@ void setup(){
   
   // Wire.begin(21, 22);
   Wire.begin();
-  I2C_MPU6886 imu(I2C_MPU6886_DEFAULT_ADDRESS, Wire);
+  MPU6886 imu(MPU6886_ADDRESS, Wire);
 
 
 
-  imu.begin();
+  imu.Init();
 
   i_am = imu.whoAmI();
 
@@ -88,43 +86,3 @@ void loop(){
 
 }
 
-
-void display_drawtest(void)
-{
-  int w = 0, h = 0;
-    //Draw a single pixel in white
-  display.drawPixel(64, 32, SSD1306_WHITE);
-
-  display.clearDisplay();
-  display.display();
-  delay(1000);
-
-
-    // DISPLAY AN INCREASING CIRCLE
-  for (h = 0; h < SCREEN_HEIGHT; h++)
-  {
-    display.drawCircle(64, 32, h, SSD1306_WHITE);
-    display.display();
-    delay(100);
-  }
-  delay(1000);
-  display.clearDisplay();
-    // DISPLAY A DECREASING CIRCLE
-  for (h = SCREEN_HEIGHT; h > 0; h--)
-  {
-    display.drawCircle(64, 32, h, SSD1306_WHITE);
-    display.display();
-    delay(100);
-  }
-  delay(1000);
-  
-  // DISPLAY A FILLING SCREEEN
-  for (w = 0; w < SCREEN_WIDTH; w++)
-  {
-    for (h = 0; h < SCREEN_HEIGHT; h++)
-    {
-      display.drawPixel(w,h, SSD1306_WHITE);
-      
-    } 
-  }
-}
