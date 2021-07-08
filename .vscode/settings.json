@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "arduino.h": "c",
+        "mpu6886.h": "c",
+        "math.h": "c",
+        "wire.h": "c"
+    }
+}
