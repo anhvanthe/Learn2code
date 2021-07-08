@@ -13,7 +13,15 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
+float accX = 0;
+float accY = 0;
+float accZ = 0;
 
+float gyroX = 0;
+float gyroY = 0;
+float gyroZ = 0;
+
+float temp = 0;
 
 /*********** COMMUNICATION SELECTION ***********/
 //ADXL345 adxl = ADXL345();             // USE FOR I2C COMMUNICATION
@@ -54,16 +62,16 @@ void setup(){
   }
   display.display();
   delay(500); // Pause for 2 seconds
-  display.setTextSize(1);
+  //display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setRotation(0);
 
   // Clear the buffer
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.setTextSize(2);
+  display.setTextSize(1);
 
-  display.println(F("MPU6886...."));
+  display.println(F("MPU6886..."));
   display.display();
   delay(1000);
 
@@ -73,16 +81,20 @@ void setup(){
 /****************** MAIN CODE ******************/
 /*     Accelerometer Readings and Interrupt    */
 void loop(){
+  //display.clearDisplay();
 
-  // // Clear the buffer
-  // display.clearDisplay();
-  // display.setCursor(0, 0);
-  // display.setTextSize(2);
+  imu.getGyroData(&gyroX,&gyroY,&gyroZ);
+  imu.getAccelData(&accX,&accY,&accZ);
+  imu.getTempData(&temp);
 
-  // display.println(F("Hello, world!"));
-  // display.display();
-  // delay(1000);
-
+  Serial.println(accX,DEC);
+  Serial.println(accY,DEC);
+  Serial.println(accZ,DEC);
+  Serial.println(temp,10);
+  //printf("\n\r");
+  delay(1000);
+  //display.setCursor(0, 0);
+  //display.printFloat(gyroX, 2);
 
 }
 
