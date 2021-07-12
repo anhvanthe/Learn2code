@@ -1,21 +1,21 @@
 #include "MPU6886.h"
-//#include <Arduino.h>
+#include <Arduino.h>
 
 MPU6886::MPU6886(uint8_t deviceAddress, TwoWire &i2cPort) {
   _deviceAddress = deviceAddress;
   _i2cPort = &i2cPort;
 }
 
-uint8_t MPU6886::readByte(uint8_t address) {
-  _i2cPort->beginTransmission(_deviceAddress);
-  _i2cPort->write(address);
-  _i2cPort->endTransmission();
-  _i2cPort->requestFrom(_deviceAddress, 1);
-  uint8_t val = _i2cPort->read();
+// uint8_t MPU6886::readByte(uint8_t address) {
+//   _i2cPort->beginTransmission(_deviceAddress);
+//   _i2cPort->write(address);
+//   _i2cPort->endTransmission();
+//   _i2cPort->requestFrom(_deviceAddress, 1);
+//   uint8_t val = _i2cPort->read();
 
-  //ESP_LOGD("MPU6886", "readByte(%02X) = %02X", address, val);
-  return val;
-}
+//   //ESP_LOGD("MPU6886", "readByte(%02X) = %02X", address, val);
+//   return val;
+// }
 
 void MPU6886::I2C_Read_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t number_Bytes, uint8_t *read_Buffer){
     
@@ -31,13 +31,13 @@ void MPU6886::I2C_Read_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t n
   }        
 }
 
-void MPU6886::writeByte(uint8_t address, uint8_t data) {
-  _i2cPort->beginTransmission(_deviceAddress);
-  _i2cPort->write(address);
-  _i2cPort->write(data);
-  _i2cPort->endTransmission();
-  //ESP_LOGD("MPU6886", "writeByte(%02X) = %02X", address, data);
-}
+// void MPU6886::writeByte(uint8_t address, uint8_t data) {
+//   _i2cPort->beginTransmission(_deviceAddress);
+//   _i2cPort->write(address);
+//   _i2cPort->write(data);
+//   _i2cPort->endTransmission();
+//   //ESP_LOGD("MPU6886", "writeByte(%02X) = %02X", address, data);
+// }
 
 void MPU6886::I2C_Write_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t number_Bytes, uint8_t *write_Buffer){
 
@@ -48,82 +48,95 @@ void MPU6886::I2C_Write_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t 
 }
 
 
-void MPU6886::bitOn(uint8_t address, uint8_t bit) {
-  uint8_t add = address;
-  uint8_t val = readByte(add) | bit;
-  writeByte(add, val);
-}
+// void MPU6886::bitOn(uint8_t address, uint8_t bit) {
+//   uint8_t add = address;
+//   uint8_t val = readByte(add) | bit;
+//   writeByte(add, val);
+// }
 
-void MPU6886::bitOff(uint8_t address, uint8_t bit) {
-  uint8_t add = address;
-  uint8_t val = readByte(add) & ~bit;
-  writeByte(add, val);
-}
+// void MPU6886::bitOff(uint8_t address, uint8_t bit) {
+//   uint8_t add = address;
+//   uint8_t val = readByte(add) & ~bit;
+//   writeByte(add, val);
+// }
 
 uint16_t MPU6886::Init(void) {
   // WHO_AM_I : IMU Check
-  if (whoAmI() != 0x19) {
+  unsigned char tempdata[1];
+  unsigned char regdata;
+  
+  //Wire1.begin(25,21,100000);
+  
+  //I2C_Read_NBytes(MPU6886_ADDRESS, MPU6886_WHOAMI, 1, tempdata);
+  I2C_Read_NBytes(MPU6886_ADDRESS, MPU6886_WHOAMI, 1, tempdata);
+  //Serial.print("%02X\r\n",tempdata[0]);
+  if(tempdata[0] != 0x19)
     return -1;
-  }
+  delay(1);
+  
+  regdata = 0x00;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_PWR_MGMT_1, 1, &regdata);
   delay(10);
 
-  // PWR_MGMT_1(0x6b)
-  writeByte(MPU6886_PWR_MGMT_1, 0x00);
-  //delay(10);
+  regdata = (0x01<<7);
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_PWR_MGMT_1, 1, &regdata);
+  delay(10);
 
-  // PWR_MGMT_1(0x6b)
-  writeByte(MPU6886_PWR_MGMT_1, 1 << 7);
-  //delay(10);
+  regdata = (0x01<<0);
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_PWR_MGMT_1, 1, &regdata);
+  delay(10);
 
-  // PWR_MGMT_1(0x6b)
-  writeByte(MPU6886_PWR_MGMT_1, 1 << 0);
-  //delay(10);
+  regdata = 0x10;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_ACCEL_CONFIG, 1, &regdata);
+  delay(1);
 
-  // ACCEL_CONFIG(0x1c) : +-8G
-  writeByte(MPU6886_ACCEL_CONFIG, 0x10);
-  //delay(1);
+  regdata = 0x18;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_GYRO_CONFIG, 1, &regdata);
+  delay(1);
 
-  // GYRO_CONFIG(0x1b) : +-2000dps
-  writeByte(MPU6886_GYRO_CONFIG, 0x18);
-  //delay(1);
+  regdata = 0x01;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_CONFIG, 1, &regdata);
+  delay(1);
 
-  // CONFIG(0x1a)
-  writeByte(MPU6886_CONFIG, 0x01);
-  //delay(1);
+  regdata = 0x05;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_SMPLRT_DIV, 1,&regdata);
+  delay(1);
 
-  // SMPLRT_DIV(0x19)
-  writeByte(MPU6886_SMPLRT_DIV, 0x05);
-  //delay(1);
+  regdata = 0x00;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_INT_ENABLE, 1, &regdata);
+  delay(1);
 
-  // INT_ENABLE(0x38)
-  writeByte(MPU6886_INT_ENABLE, 0x00);
-  //delay(1);
+  regdata = 0x00;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_ACCEL_CONFIG2, 1, &regdata);
+  delay(1);
 
-  // ACCEL_CONFIG 2(0x1d)
-  writeByte(MPU6886_ACCEL_CONFIG2, 0x00);
-  //delay(1);
+  regdata = 0x00;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_USER_CTRL, 1, &regdata);
+  delay(1);
 
-  // USER_CTRL(0x6a)
-  writeByte(MPU6886_USER_CTRL, 0x00);
-  //delay(1);
+  regdata = 0x00;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_FIFO_EN, 1, &regdata);
+  delay(1);
 
-  // FIFO_EN(0x23)
-  writeByte(MPU6886_FIFO_EN, 0x00);
-  //delay(1);
+  regdata = 0x22;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_INT_PIN_CFG, 1, &regdata);
+  delay(1);
 
-  // INT_PIN_CFG(0x37)
-  writeByte(MPU6886_INT_PIN_CFG, 0x22);
-  //delay(1);
+  regdata = 0x01;
+  I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_INT_ENABLE, 1, &regdata);
 
-  // INT_ENABLE(0x38)
-  writeByte(MPU6886_INT_ENABLE, 0x01);
   delay(100);
+  getGres();
+  getAres();
+  return 0;
 
   return 0;
 }
 
 uint8_t MPU6886::whoAmI(void) {
-  return readByte(MPU6886_WHOAMI);
+  uint8_t i_am;
+  I2C_Read_NBytes(MPU6886_ADDRESS, MPU6886_WHOAMI, 1, &i_am);
+  return i_am;
 }
 
 void MPU6886::enableWakeOnMotion(Ascale ascale, uint8_t thresh_num_lsb) {
@@ -210,23 +223,23 @@ void MPU6886::enableWakeOnMotion(Ascale ascale, uint8_t thresh_num_lsb) {
     I2C_Write_NBytes(MPU6886_ADDRESS, MPU6886_PWR_MGMT_1, 1, &regdata);
 }
 
-void MPU6886::getAccel(float* ax, float* ay, float* az) {
-  float aRes = 8.0 / 32768.0;
-  *ax = (int16_t)((readByte(0x3b) << 8) | readByte(0x3c)) * aRes;
-  *ay = (int16_t)((readByte(0x3d) << 8) | readByte(0x3e)) * aRes;
-  *az = (int16_t)((readByte(0x3f) << 8) | readByte(0x40)) * aRes;
-}
+// void MPU6886::getAccel(float* ax, float* ay, float* az) {
+//   float aRes = 8.0 / 32768.0;
+//   *ax = (int16_t)((readByte(0x3b) << 8) | readByte(0x3c)) * aRes;
+//   *ay = (int16_t)((readByte(0x3d) << 8) | readByte(0x3e)) * aRes;
+//   *az = (int16_t)((readByte(0x3f) << 8) | readByte(0x40)) * aRes;
+// }
 
-void MPU6886::getGyro(float* gx, float* gy, float* gz) {
-  float gRes = 2000.0 / 32768.0;
-  *gx = (int16_t)((readByte(0x43) << 8) | readByte(0x44)) * gRes;
-  *gy = (int16_t)((readByte(0x45) << 8) | readByte(0x46)) * gRes;
-  *gz = (int16_t)((readByte(0x47) << 8) | readByte(0x48)) * gRes;
-}
+// void MPU6886::getGyro(float* gx, float* gy, float* gz) {
+//   float gRes = 2000.0 / 32768.0;
+//   *gx = (int16_t)((readByte(0x43) << 8) | readByte(0x44)) * gRes;
+//   *gy = (int16_t)((readByte(0x45) << 8) | readByte(0x46)) * gRes;
+//   *gz = (int16_t)((readByte(0x47) << 8) | readByte(0x48)) * gRes;
+// }
 
-void MPU6886::getTemp(float *t) {
-  *t = 25.0 + ((readByte(0x41) << 8) | readByte(0x42)) / 326.8;
-}
+// void MPU6886::getTemp(float *t) {
+//   *t = 25.0 + ((readByte(0x41) << 8) | readByte(0x42)) / 326.8;
+// }
 
 void MPU6886::getAccelAdc(int16_t* ax, int16_t* ay, int16_t* az){
 

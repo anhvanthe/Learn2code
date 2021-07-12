@@ -105,13 +105,13 @@ class MPU6886 {
     void getTemp(float *t);
 
   private:
-    uint8_t readByte(uint8_t address);
-    void writeByte(uint8_t address, uint8_t data);
+    //uint8_t readByte(uint8_t address);
+    //void writeByte(uint8_t address, uint8_t data);
     //void I2C_Write_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t number_Bytes, uint8_t *write_Buffer);
     void I2C_Read_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t number_Bytes, uint8_t *read_Buffer);
     void I2C_Write_NBytes(uint8_t driver_Addr, uint8_t start_Addr, uint8_t number_Bytes, uint8_t *write_Buffer);
-    void bitOn(uint8_t address, uint8_t bit);
-    void bitOff(uint8_t address, uint8_t bit);
+    //void bitOn(uint8_t address, uint8_t bit);
+    //void bitOff(uint8_t address, uint8_t bit);
 
     TwoWire *_i2cPort;
     int _deviceAddress;
